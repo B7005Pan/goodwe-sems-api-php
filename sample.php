@@ -1,10 +1,11 @@
 <?php
 
-$username = ""; // !
-$password = ""; // !
-$powerstation_id = ""; // !
+$username = 'account@account.account'; 
+$password = 'passwd'; 
+$powerstation_id = 'aaaaaa-aaaaaa-aaaa-aaaaa-aaaaaaaa'; 
 
-require_once './lib/GoodWe/Sems/Client.php';
+//require_once './lib/GoodWe/Sems/Client.php';
+require_once './src/GoodWe/Sems/Client.php';
 
 $GoodWe = (new GoodWe\Sems\Client(
     $username,
