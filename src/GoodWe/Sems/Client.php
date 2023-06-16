@@ -80,33 +80,39 @@ class Client
             echo 'Error:' . curl_error($ch);
         }
         curl_close($ch);
-
+	
+	//print_r($result);
         return $this;
     }
 
-    public function getApiData($endpoint, $param)
-    {
+    public function getApiData2($endpoint, $param)    {
         $data = [
-            "api" => $endpoint,
-            "param" => $param
+            'api' => $endpoint,
+            'param' => $param
         ];
+        
+        $data = json_encode($data);
+        $valor = [
+		'str' => $data,
+        ];
+        
+        //$file = file_get_contents('./src/GoodWe/Sems' . '/http_cookies.txt');
+        //echo $file;
 
-        $ch = $this->httpclient;
-        curl_setopt($ch, CURLOPT_URL, self::HOSTNAME . '/GopsApi/Post?s=' . $endpoint);
+        
+        $ch = curl_init( self::HOSTNAME . '/GopsApi/Post7?s=' . $endpoint);
+        
+        curl_setopt($ch, CURLOPT_COOKIEJAR, './src/GoodWe/Sems' . '/http_cookies.txt');
+        curl_setopt($ch, CURLOPT_COOKIEFILE, './src/GoodWe/Sems' . '/http_cookies.txt');
+        curl_setopt($ch, CURLOPT_USERAGENT, self::USERAGENT);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
 
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt(
-            $ch,
-            CURLOPT_POSTFIELDS,
-            "str=" . urlencode(json_encode($data))
-        );
+//        curl_setopt( $ch, CURLOPT_POSTFIELDS,  "str=" . urlencode(json_encode($param)));
+        curl_setopt( $ch, CURLOPT_POSTFIELDS,  $valor);
 
-
-        $result = curl_exec($ch);
-        if (curl_errno($ch)) {
-            echo 'Error:' . curl_error($ch);
-        }
-        curl_close($ch);
 
         $result = curl_exec($ch);
         if ($result === FALSE) {
@@ -117,27 +123,70 @@ class Client
             );
         }
 
+        curl_close($ch);
+
+        return json_decode($result, true);
+    }
+
+
+
+    public function getApiData($endpoint, $param)    {
+        $data = [
+            'api' => $endpoint,
+            'param' => $param
+        ];
+        
+        $data = json_encode($data);
+        $valor = [
+		'str' => $data,
+        ];
+        
+        //$file = file_get_contents('./src/GoodWe/Sems' . '/http_cookies.txt');
+        //echo $file;
+
+        
+        $ch = curl_init( self::HOSTNAME . '/GopsApi/Post2?s=' . $endpoint);
+        
+        curl_setopt($ch, CURLOPT_COOKIEJAR, './src/GoodWe/Sems' . '/http_cookies.txt');
+        curl_setopt($ch, CURLOPT_COOKIEFILE, './src/GoodWe/Sems' . '/http_cookies.txt');
+        curl_setopt($ch, CURLOPT_USERAGENT, self::USERAGENT);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        curl_setopt($ch, CURLOPT_POST, 1);
+//        curl_setopt( $ch, CURLOPT_POSTFIELDS,  "str=" . urlencode(json_encode($param)));
+        curl_setopt( $ch, CURLOPT_POSTFIELDS,  $valor);
+
+
+        $result = curl_exec($ch);
+        if ($result === FALSE) {
+            printf(
+                "cUrl error (#%d): %s<br>\n",
+                curl_errno($ch),
+                htmlspecialchars(curl_error($ch))
+            );
+        }
+
+        curl_close($ch);
+
         return json_decode($result, true);
     }
 
     public function GetMonitorDetailByPowerstationId($powerStationId) {
         return $this->getApiData(
-            "v1/PowerStation/GetMonitorDetailByPowerstationId", 
-            [ 
-                "powerStationId" => $powerStationId
-            ]
+		"v3/PowerStation/GetPlantDetailByPowerstationId", 
+		["powerStationId" => $powerStationId]
         );
     }
 
     public function GetMonthlyChartDataByPowerstationId($powerStationId) {
-        return $this->getApiData(
-            "v2/Charts/GetChartByPlant", 
+        return $this->getApiData2(  // ojo es Data2
+		"/v2/Charts/GetPlantPowerChart",
             [ 
                 "id" => $powerStationId,
                 "date" => date("Y-m-d"),
-                "range" => "3",
-                "chartIndexId" => "3",
-                "isDetailFull" => ""
+                "full_script" => false
             ]
         );
     }
